@@ -1,8 +1,8 @@
-C_SRCS += ./src/*.cpp
+C_SRCS += ./src/main.cpp
 
-C_DEPS += ./src/*.d
+C_DEPS += ./src/main.d
 
-OBJS += ./src/*.o
+OBJS += ./src/main.o
 
 src/%.o: ./src/%.cpp src/subdir.mk
 	@echo 'Building file: $<'
