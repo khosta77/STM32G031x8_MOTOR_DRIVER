@@ -1,7 +1,8 @@
 #include "systemcoreclockset.hpp"
+#include <cmath>
 #include <stdint.h>
 
-void usart_write_byte( uint8_t data )
+void usart_write_byte( const uint8_t data )
 {
     /*
      *  Так тут был косяк с FIFO он не включе а флаг был настроен на то что FIFI
@@ -12,13 +13,14 @@ void usart_write_byte( uint8_t data )
     while ( ( USART1->ISR & USART_ISR_TC ) == 0 );
 }
 
-void usart_write_string( const char *s )
+void usart_write_bytes( const uint8_t *ptr, const uint32_t size )
 {
-    if ( s == nullptr )
+    if ( ptr == nullptr )
         return;
-    while ( *s != '\0' )
+
+    for ( uint32_t i = 0; i < size; ++i )
     {
-        usart_write_byte( *s++ );
+        usart_write_byte( *( ptr + i ) );
     }
 }
 
@@ -55,66 +57,117 @@ void usart_init( uint32_t baud )
     // configuration, transmit enable
     // default 8-N-1 configuration, transmit & receive enable
     USART1->CR1 = ( USART_CR1_TE | USART_CR1_RE | USART_CR1_RXNEIE_RXFNEIE );
-
-    // USART1->BRR = 138; 	    // 16000000/115200 with 16x oversampling
-    // USART1->BRR = 278; // 16000000/57600= 277.7 with 16x oversampling
-    // USART1->BRR = 32000000U  // 9600;
-    // USART1->CR2 = 0;
-    // USART1->CR3 = 0;
-    // USART1->PRESC = 0;
     USART1->CR1 |= USART_CR1_UE;
 
-    // NVIC_EnableIRQ( USART1_IRQn );
-    // NVIC_SetPriority( USART1_IRQn, 3 );
+    NVIC_EnableIRQ( USART1_IRQn );
+    NVIC_SetPriority( USART1_IRQn, 2 );
 }
 
 uint8_t MSG_STATUS = 0x00;
 uint8_t data = 0x00;
 
-#if 0
+union MotorSettingsFromMessage
+{
+    uint8_t _frame[12];
+    uint32_t _settings[3];
+    // 0 - max_speed    uint32_t
+    // 1 - acceleration uint32_t
+    // 2 - target_pos   uint32_t
+} msfm1, msfm2;
+
+uint8_t msfm_i = 0;
+
+#define MSFM_MRK_MODE 0x01  // if 1 - msfm1 else msfm2
+#define MSFM_MRK_READY 0x02 // if 1 ready else no ready
+uint8_t msfm_mrk = 0b00000001;
+
 extern "C"
 {
-    void __attribute__( ( interrupt, used ) ) USART1_IRQHandler( void )
-    {
-        if ( ( USART1->ISR & USART_ISR_RXNE_RXFNE ) )
-        {
-            uint32_t primask;
-            uint16_t end;
+void __attribute__( ( interrupt, used ) ) USART1_IRQHandler( void )
+{
 
-            primask = __get_PRIMASK(); /* get the interrupt status */
-            __disable_irq(); /* disable IRQs, this will modify PRIMASK */
-            data = USART1->RDR;
-            MSG_STATUS = 0xFF;
-            __set_PRIMASK( primask ); /* restore interrupt state */
-            return;
-        }
-        if ( USART1->ISR &
-             ( USART_ISR_PE | USART_ISR_FE | USART_ISR_NE | USART_ISR_ORE ) )
+    if ( READ_BIT( USART1->ISR, USART_ISR_RXNE_RXFNE ) == USART_ISR_RXNE_RXFNE )
+    {
+        uint32_t primask;
+        uint16_t end;
+
+        primask = __get_PRIMASK(); /* get the interrupt status */
+        __disable_irq();           /* disable IRQs, this will modify PRIMASK */
+
+        if ( READ_BIT( msfm_mrk, MSFM_MRK_MODE ) == MSFM_MRK_MODE )
         {
-            // Clear error flags
-            USART1->ICR = USART_ICR_PECF | USART_ICR_FECF | USART_ICR_CMCF |
-                          USART_ICR_ORECF;
+            msfm1._frame[msfm_i++] = ( USART1->RDR + 1 );
         }
+        else
+        {
+            msfm2._frame[msfm_i++] = ( USART1->RDR + 1 );
+        }
+
+        if ( msfm_i == 12 )
+        {
+            msfm_i = 0;
+            if ( READ_BIT( msfm_mrk, MSFM_MRK_MODE ) == MSFM_MRK_MODE )
+            {
+                CLEAR_BIT( msfm_mrk, MSFM_MRK_MODE );
+            }
+            else
+            {
+                SET_BIT( msfm_mrk, MSFM_MRK_MODE );
+            }
+        }
+
+        SET_BIT( msfm_mrk, MSG_STATUS );
+        __set_PRIMASK( primask ); /* restore interrupt state */
+
+        return;
     }
 }
-#endif
+} // extern "C"
+
 int main( void )
 {
     SystemCoreClockSet64MHz();
     usart_init( 115200 );
 
-    uint8_t buffer = 0x00;
+    // Инициализация периферии
+    GPIOA->MODER &= ~GPIO_MODER_MODE0;
+    GPIOA->MODER |= GPIO_MODER_MODE0_0;
+    GPIOA->OTYPER &= ~GPIO_OTYPER_OT0;
+    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPD0;
+
+    GPIOA->MODER &= ~GPIO_MODER_MODE1;
+    GPIOA->MODER |= GPIO_MODER_MODE1_0;
+    GPIOA->OTYPER &= ~GPIO_OTYPER_OT1;
+    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPD1;
+
+    /*
+     * Какая то херня с прерываниями
+     * */
+    uint8_t buffer[12] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    uint8_t *ptr = &buffer[0];
     while ( 1 )
     {
-        usart_write_byte( buffer );
+        usart_write_bytes( ptr, 12 );
 
-        for ( uint32_t t = 0; t < 10000; ++t );
-        // while ( 1 )
-        //{
-        if ( USART1->ISR & USART_ISR_RXNE_RXFNE )
+        for ( uint32_t t = 0; t < 100000; ++t );
+
+        while ( 1 )
         {
-            buffer = ++data;
-            MSG_STATUS = 0x00;
+            if ( READ_BIT( msfm_mrk, MSG_STATUS ) == MSG_STATUS )
+            {
+                GPIOA->ODR |= GPIO_ODR_OD0;
+                CLEAR_BIT( msfm_mrk, MSG_STATUS );
+                if ( READ_BIT( msfm_mrk, MSFM_MRK_MODE ) )
+                {
+                    ptr = &msfm2._frame[0];
+                }
+                else
+                {
+                    ptr = &msfm1._frame[0];
+                }
+                GPIOA->ODR &= ~GPIO_ODR_OD0;
+                break;
+            }
         }
     }
 }
