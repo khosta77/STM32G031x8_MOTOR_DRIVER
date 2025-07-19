@@ -6,6 +6,10 @@ const uint8_t USART1_NVIC_PRIORITY = 4;
 const uint8_t PB3_NVIC_PRIORITY = 2;
 const uint8_t PA4_PA5_NVIC_PRIORITY = 3;
 
+class USART
+{
+public:
+};
 void usart_write_byte( const uint8_t data )
 {
     /*
@@ -129,34 +133,177 @@ void __attribute__( ( interrupt, used ) ) USART1_IRQHandler( void )
 
 void __attribute__( ( interrupt, used ) ) EXTI4_15_IRQHandler( void )
 {
-    // Проверяем флаги прерываний для PA4 и PA5
+    //// EN
     if ( EXTI->RPR1 & EXTI_RPR1_RPIF4 )
-    { // PA4
-        // Ваш код обработки прерывания для PA4
-        EXTI->RPR1 = EXTI_RPR1_RPIF4; // Сброс флага
-        GPIOA->ODR |= GPIO_ODR_OD0;
-        GPIOA->ODR &= ~GPIO_ODR_OD0;
+    {
+        GPIOA->ODR ^= GPIO_ODR_OD0;
+
+        // TODO: Включение работы
+        EXTI->RPR1 = EXTI_RPR1_RPIF4;
+        return;
     }
 
+    if ( EXTI->FPR1 & EXTI_FPR1_FPIF4 )
+    {
+        GPIOA->ODR ^= GPIO_ODR_OD0;
+
+        // TODO: Остановка работы
+        EXTI->FPR1 = EXTI_FPR1_FPIF4;
+        return;
+    }
+
+    //// SELECT
     if ( EXTI->RPR1 & EXTI_RPR1_RPIF5 )
-    { // PA5
-        // Ваш код обработки прерывания для PA5
-        EXTI->RPR1 = EXTI_RPR1_RPIF5; // Сброс флага
-        GPIOA->ODR |= GPIO_ODR_OD1;
-        GPIOA->ODR &= ~GPIO_ODR_OD1;
+    {
+        // TODO: Выбор и подготовка к приему
+        EXTI->RPR1 = EXTI_RPR1_RPIF5;
+        return;
+    }
+
+    if ( EXTI->FPR1 & EXTI_FPR1_FPIF5 )
+    {
+        // TODO: Старт передачи
+        EXTI->FPR1 = EXTI_FPR1_FPIF5;
+        return;
     }
 }
 
-void EXTI2_3_IRQHandler( void )
+void __attribute__( ( interrupt, used ) ) EXTI2_3_IRQHandler( void )
 {
-    // Проверяем флаг прерывания для PB3
     if ( EXTI->RPR1 & EXTI_RPR1_RPIF3 )
-    { // PB3
-        // Ваш код обработки прерывания для PB3
-        EXTI->RPR1 = EXTI_RPR1_RPIF3; // Сброс флага
+    {
+        // TODO: Остановить передачу и потому что уперлись в концевик
+        EXTI->RPR1 = EXTI_RPR1_RPIF3;
+        return;
+    }
+
+    if ( EXTI->FPR1 & EXTI_FPR1_FPIF3 )
+    {
+        // TODO: Остановить передачу и потому что уперлись в концевик
+        EXTI->FPR1 = EXTI_FPR1_FPIF3;
+        return;
     }
 }
-} // extern "C"
+
+enum class StepperState
+{
+    STEPPER_IDLE,
+    STEPPER_ACCEL,
+    STEPPER_CRUISE,
+    STEPPER_DECEL
+};
+
+struct Stepper
+{
+    // Конфигурация
+    uint32_t max_speed;    // steps/sec
+    uint32_t acceleration; // steps/sec²
+    int32_t target_pos;
+    uint16_t step_pin;
+    uint16_t dir_pin;
+
+    // Состояние
+    StepperState state;
+    int32_t step_count;
+    uint32_t accel_steps;
+    uint32_t cruise_steps;
+    uint32_t step_delay;
+    float current_speed;
+    float speed_increment;
+};
+
+Stepper stepper;
+
+void __attribute__( ( interrupt, used ) ) TIM2_IRQHandler( void )
+{
+    if ( TIM2->SR & TIM_SR_UIF )
+    {
+        TIM2->SR &= ~TIM_SR_UIF;
+
+        // Генерация шага
+        GPIOA->BSRR = stepper.step_pin;
+        (void) GPIOA->BSRR;
+        GPIOA->BSRR = (uint32_t) stepper.step_pin << 16;
+
+        switch ( stepper.state )
+        {
+            case StepperState::STEPPER_ACCEL:
+                stepper.current_speed += stepper.speed_increment;
+                if ( ++stepper.step_count >= stepper.accel_steps )
+                {
+                    stepper.step_count = 0;
+                    stepper.state = StepperState::STEPPER_CRUISE;
+                }
+                break;
+
+            case StepperState::STEPPER_CRUISE:
+                if ( ++stepper.step_count >= stepper.cruise_steps )
+                {
+                    stepper.step_count = 0;
+                    stepper.state = StepperState::STEPPER_DECEL;
+                }
+                break;
+
+            case StepperState::STEPPER_DECEL:
+                stepper.current_speed -= stepper.speed_increment;
+                if ( ++stepper.step_count >= stepper.accel_steps )
+                {
+                    stepper.state = StepperState::STEPPER_IDLE;
+                    GPIOA->BSRR = (uint32_t) stepper.dir_pin << 16;
+                    TIM2->CR1 &= ~TIM_CR1_CEN;
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        // Пересчёт периода
+        if ( stepper.state != StepperState::STEPPER_IDLE )
+        {
+            uint32_t period = (uint32_t) ( SystemCoreClock / ( stepper.current_speed * 2 ) );
+            TIM2->ARR = period - 1;
+            TIM2->CNT = 0;
+        }
+    }
+}
+}
+
+void Stepper_Init( void )
+{
+    RCC->APBENR1 |= RCC_APBENR1_TIM2EN;
+    TIM2->PSC = 0;
+    TIM2->ARR = 1000;
+    TIM2->DIER |= TIM_DIER_UIE;
+    NVIC_EnableIRQ( TIM2_IRQn );
+}
+
+void Stepper_Move( Stepper *s )
+{
+    if ( s->target_pos == 0 )
+        return;
+
+    // Направление
+    GPIOA->BSRR = s->target_pos > 0 ? s->dir_pin : (uint32_t) s->dir_pin << 16;
+
+    // Расчёт параметров
+    uint32_t total_steps = fabs( s->target_pos );
+    s->accel_steps = ( s->max_speed * s->max_speed ) / ( 2 * s->acceleration );
+    s->accel_steps = s->accel_steps > total_steps / 2 ? total_steps / 2 : s->accel_steps;
+    s->cruise_steps = total_steps - 2 * s->accel_steps;
+
+    s->current_speed = sqrtf( 2 * s->acceleration );
+    s->speed_increment = ( s->max_speed - s->current_speed ) / s->accel_steps;
+
+    s->step_count = 0;
+    s->state = StepperState::STEPPER_ACCEL;
+
+    // Запуск таймера
+    uint32_t period = (uint32_t) ( SystemCoreClock / ( s->current_speed * 2 ) );
+    TIM2->ARR = period - 1;
+    TIM2->CNT = 0;
+    TIM2->CR1 |= TIM_CR1_CEN;
+}
 
 int main( void )
 {
@@ -168,11 +315,6 @@ int main( void )
     GPIOA->MODER |= GPIO_MODER_MODE0_0;
     GPIOA->OTYPER &= ~GPIO_OTYPER_OT0;
     GPIOA->PUPDR &= ~GPIO_PUPDR_PUPD0;
-
-    GPIOA->MODER &= ~GPIO_MODER_MODE1;
-    GPIOA->MODER |= GPIO_MODER_MODE1_0;
-    GPIOA->OTYPER &= ~GPIO_OTYPER_OT1;
-    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPD1;
 
     ////
     RCC->IOPENR |= RCC_IOPENR_GPIOBEN;
@@ -188,7 +330,7 @@ int main( void )
 
     // Настраиваем EXTI для PB3 (EXTI3)
     EXTI->EXTICR[0] &= ~EXTI_EXTICR1_EXTI3;
-    EXTI->EXTICR[0] |= ( 1 << EXTI_EXTICR1_EXTI3_Pos ); // PB3 для EXTI3
+    EXTI->EXTICR[0] |= EXTI_EXTICR1_EXTI3_0; // для PBx
 
     // Настраиваем EXTI для PA4 (EXTI4) и PA5 (EXTI5)
     EXTI->EXTICR[1] &= ~( EXTI_EXTICR2_EXTI4 | EXTI_EXTICR2_EXTI5 );
@@ -196,7 +338,7 @@ int main( void )
 
     // Включаем триггер по фронту (настраивайте по необходимости)
     EXTI->RTSR1 |= EXTI_RTSR1_RT3 | EXTI_RTSR1_RT4 | EXTI_RTSR1_RT5; // Rising trigger
-    // EXTI->FTSR1 |= EXTI_FTSR1_FT3 | EXTI_FTSR1_FT4 | EXTI_FTSR1_FT5; // Falling trigger
+    EXTI->FTSR1 |= EXTI_FTSR1_FT3 | EXTI_FTSR1_FT4 | EXTI_FTSR1_FT5; // Falling trigger
 
     // Разрешаем прерывания
     EXTI->IMR1 |= EXTI_IMR1_IM3 | EXTI_IMR1_IM4 | EXTI_IMR1_IM5;
@@ -207,6 +349,24 @@ int main( void )
 
     NVIC_SetPriority( EXTI4_15_IRQn, PA4_PA5_NVIC_PRIORITY ); // Приоритет для EXTI4_15 (PA4, PA5)
     NVIC_EnableIRQ( EXTI4_15_IRQn );
+    ////
+
+    GPIOA->MODER |= GPIO_MODER_MODE1_0 | GPIO_MODER_MODE2_0;
+    GPIOA->OTYPER &= ~( GPIO_OTYPER_OT1 | GPIO_OTYPER_OT2 );
+    GPIOA->PUPDR &= ~( GPIO_PUPDR_PUPD1 | GPIO_PUPDR_PUPD2 );
+
+    Stepper_Init();
+
+    // Настройка шаговика
+    stepper.max_speed = 20000;
+    stepper.acceleration = 20000;
+    stepper.target_pos = 10000;
+    stepper.step_pin = 1;
+    stepper.dir_pin = 2;
+
+    // Запуск движения
+    Stepper_Move( &stepper );
+
     /*
      * Какая то херня с прерываниями
      * */

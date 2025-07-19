@@ -456,8 +456,9 @@ typedef struct
 #define SCB_SHCSR_SVCALLPENDED_Pos                                                                           \
     15U /*!< SCB SHCSR: SVCALLPENDED Position                                                                \
          */
-#define SCB_SHCSR_SVCALLPENDED_Msk ( 1UL << SCB_SHCSR_SVCALLPENDED_Pos ) /*!< SCB SHCSR: SVCALLPENDED Mask   \
-                                                                          */
+#define SCB_SHCSR_SVCALLPENDED_Msk                                                                           \
+    ( 1UL << SCB_SHCSR_SVCALLPENDED_Pos ) /*!< SCB SHCSR: SVCALLPENDED Mask                                  \
+                                           */
 
 /*@} end of group CMSIS_SCB */
 
@@ -515,12 +516,14 @@ typedef struct
 #define SysTick_CTRL_COUNTFLAG_Pos                                                                           \
     16U /*!< SysTick CTRL: COUNTFLAG Position                                                                \
          */
-#define SysTick_CTRL_COUNTFLAG_Msk ( 1UL << SysTick_CTRL_COUNTFLAG_Pos ) /*!< SysTick CTRL: COUNTFLAG Mask   \
-                                                                          */
+#define SysTick_CTRL_COUNTFLAG_Msk                                                                           \
+    ( 1UL << SysTick_CTRL_COUNTFLAG_Pos ) /*!< SysTick CTRL: COUNTFLAG Mask                                  \
+                                           */
 
 #define SysTick_CTRL_CLKSOURCE_Pos 2U /*!< SysTick CTRL: CLKSOURCE Position */
-#define SysTick_CTRL_CLKSOURCE_Msk ( 1UL << SysTick_CTRL_CLKSOURCE_Pos ) /*!< SysTick CTRL: CLKSOURCE Mask   \
-                                                                          */
+#define SysTick_CTRL_CLKSOURCE_Msk                                                                           \
+    ( 1UL << SysTick_CTRL_CLKSOURCE_Pos ) /*!< SysTick CTRL: CLKSOURCE Mask                                  \
+                                           */
 
 #define SysTick_CTRL_TICKINT_Pos 1U                                  /*!< SysTick CTRL: TICKINT Position */
 #define SysTick_CTRL_TICKINT_Msk ( 1UL << SysTick_CTRL_TICKINT_Pos ) /*!< SysTick CTRL: TICKINT Mask */

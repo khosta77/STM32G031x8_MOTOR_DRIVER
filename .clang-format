@@ -23,6 +23,7 @@ BraceWrapping:
   SplitEmptyRecord: false      # Не разделять пустые структуры/классы
   SplitEmptyNamespace: false   # Не разделять пустые пространства имён
 IndentCaseLabels: true
+AccessModifierOffset: -4
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: true          # while(some());
 AllowShortBlocksOnASingleLine: false        # while(some()) {} - переноситься

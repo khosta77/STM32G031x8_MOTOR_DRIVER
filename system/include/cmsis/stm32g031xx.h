@@ -6782,8 +6782,9 @@ typedef struct
 #define SYSCFG_ITLINE28_SR_USART2_GLB                                                                        \
     SYSCFG_ITLINE28_SR_USART2_GLB_Msk /*!< USART2 GLB Interrupt -> exti[26] */
 #define SYSCFG_ITLINE29_SR_LPUART1_GLB_Pos ( 2U )
-#define SYSCFG_ITLINE29_SR_LPUART1_GLB_Msk ( 0x1UL << SYSCFG_ITLINE29_SR_LPUART1_GLB_Pos ) /*!< 0x00000004   \
-                                                                                            */
+#define SYSCFG_ITLINE29_SR_LPUART1_GLB_Msk                                                                   \
+    ( 0x1UL << SYSCFG_ITLINE29_SR_LPUART1_GLB_Pos ) /*!< 0x00000004                                          \
+                                                     */
 #define SYSCFG_ITLINE29_SR_LPUART1_GLB                                                                       \
     SYSCFG_ITLINE29_SR_LPUART1_GLB_Msk /*!< LPUART1 GLB Interrupt -> exti[28]                                \
                                         */
