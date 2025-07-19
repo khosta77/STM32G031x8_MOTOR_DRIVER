@@ -67,8 +67,7 @@ void __attribute__( ( weak ) ) __initialize_hardware_early( void )
     // so it needs to be recomputed after the RAM initialisations
     // are completed.
 
-#if defined( OS_INCLUDE_STARTUP_INIT_FP ) ||                                   \
-    ( defined( __VFP_FP__ ) && !defined( __SOFTFP__ ) )
+#if defined( OS_INCLUDE_STARTUP_INIT_FP ) || ( defined( __VFP_FP__ ) && !defined( __SOFTFP__ ) )
 
     // Normally FP init is done by SystemInit(). In case this is not done
     // there, it is possible to force its inclusion by defining

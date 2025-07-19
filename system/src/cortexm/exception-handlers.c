@@ -49,17 +49,12 @@ extern void __attribute__( ( noreturn, weak ) ) _start( void );
 
 // The DEBUG version is not naked, but has a proper stack frame,
 // to allow setting breakpoints at Reset_Handler.
-void __attribute__( ( section( ".after_vectors" ), noreturn ) )
-Reset_Handler( void )
-{
-    _start();
-}
+void __attribute__( ( section( ".after_vectors" ), noreturn ) ) Reset_Handler( void ) { _start(); }
 
 #else
 
 // The Release version is optimised to a quick branch to _start.
-void __attribute__( ( section( ".after_vectors" ), naked ) )
-Reset_Handler( void )
+void __attribute__( ( section( ".after_vectors" ), naked ) ) Reset_Handler( void )
 {
     asm volatile( " ldr     r0,=_start \n"
                   " bx      r0"
@@ -97,8 +92,8 @@ void __attribute__( ( section( ".after_vectors" ), weak ) ) NMI_Handler( void )
 // 3. Optionally clear BFARVALID or MMARVALID.
 // (See Joseph Yiu's book).
 
-void dumpExceptionStack( ExceptionStackFrame *frame, uint32_t cfsr,
-                         uint32_t mmfar, uint32_t bfar, uint32_t lr )
+void dumpExceptionStack( ExceptionStackFrame *frame, uint32_t cfsr, uint32_t mmfar, uint32_t bfar,
+                         uint32_t lr )
 {
     trace_printf( "Stack frame:\n" );
     trace_printf( " R0 =  %08X\n", frame->r0 );
@@ -154,8 +149,7 @@ void dumpExceptionStack( ExceptionStackFrame *frame, uint32_t lr )
 
 #if defined( __ARM_ARCH_7M__ ) || defined( __ARM_ARCH_7EM__ )
 
-#if defined( OS_USE_SEMIHOSTING ) ||                                           \
-    defined( OS_USE_TRACE_SEMIHOSTING_STDOUT ) ||                              \
+#if defined( OS_USE_SEMIHOSTING ) || defined( OS_USE_TRACE_SEMIHOSTING_STDOUT ) ||                           \
     defined( OS_USE_TRACE_SEMIHOSTING_DEBUG )
 
 int isSemihosting( ExceptionStackFrame *frame, uint16_t opCode );
@@ -173,7 +167,7 @@ int isSemihosting( ExceptionStackFrame *frame, uint16_t opCode )
     if ( *pw == opCode )
     {
         uint32_t r0 = frame->r0;
-#if defined( OS_DEBUG_SEMIHOSTING_FAULTS ) || defined( OS_USE_SEMIHOSTING ) || \
+#if defined( OS_DEBUG_SEMIHOSTING_FAULTS ) || defined( OS_USE_SEMIHOSTING ) ||                               \
     defined( OS_USE_TRACE_SEMIHOSTING_STDOUT )
         uint32_t r1 = frame->r1;
 #endif
@@ -220,8 +214,7 @@ int isSemihosting( ExceptionStackFrame *frame, uint16_t opCode )
                 break;
 
             case SEMIHOSTING_SYS_ISERROR:
-                frame->r0 =
-                    0; // 0 if the status word is not an error indication
+                frame->r0 = 0; // 0 if the status word is not an error indication
                 break;
 
             case SEMIHOSTING_SYS_READ:
@@ -235,8 +228,7 @@ int isSemihosting( ExceptionStackFrame *frame, uint16_t opCode )
                 break;
 
             case SEMIHOSTING_SYS_TIME:
-                frame->r0 =
-                    0; // the number of seconds since 00:00 January 1, 1970.
+                frame->r0 = 0; // the number of seconds since 00:00 January 1, 1970.
                 break;
 
             case SEMIHOSTING_ReportException:
@@ -280,12 +272,10 @@ int isSemihosting( ExceptionStackFrame *frame, uint16_t opCode )
             case SEMIHOSTING_SYS_WRITE:
                 // Silently ignore writes to stdout/stderr, fail on all other
                 // handler.
-                if ( ( blk[0] == HANDLER_STDOUT ) ||
-                     ( blk[0] == HANDLER_STDERR ) )
+                if ( ( blk[0] == HANDLER_STDOUT ) || ( blk[0] == HANDLER_STDERR ) )
                 {
 #if defined( OS_DEBUG_SEMIHOSTING_FAULTS )
-                    frame->r0 = (uint32_t) blk[2] -
-                                trace_write( (char *) blk[1], blk[2] );
+                    frame->r0 = (uint32_t) blk[2] - trace_write( (char *) blk[1], blk[2] );
 #else
                     frame->r0 = 0; // all sent, no more.
 #endif // defined(OS_DEBUG_SEMIHOSTING_FAULTS)
@@ -301,8 +291,7 @@ int isSemihosting( ExceptionStackFrame *frame, uint16_t opCode )
 #endif // defined(OS_USE_SEMIHOSTING) ||
        // defined(OS_USE_TRACE_SEMIHOSTING_STDOUT)
 
-#if defined( OS_USE_SEMIHOSTING ) ||                                           \
-    defined( OS_USE_TRACE_SEMIHOSTING_STDOUT ) ||                              \
+#if defined( OS_USE_SEMIHOSTING ) || defined( OS_USE_TRACE_SEMIHOSTING_STDOUT ) ||                           \
     defined( OS_USE_TRACE_SEMIHOSTING_DEBUG )
 
             case SEMIHOSTING_SYS_WRITEC:
@@ -348,8 +337,7 @@ int isSemihosting( ExceptionStackFrame *frame, uint16_t opCode )
 // (Based on Joseph Yiu's, The Definitive Guide to ARM Cortex-M3 and
 // Cortex-M4 Processors, Third Edition, Chap. 12.8, page 402).
 
-void __attribute__( ( section( ".after_vectors" ), weak, naked ) )
-HardFault_Handler( void )
+void __attribute__( ( section( ".after_vectors" ), weak, naked ) ) HardFault_Handler( void )
 {
     asm volatile( " tst lr,#4       \n"
                   " ite eq          \n"
@@ -375,8 +363,7 @@ HardFault_Handler_C( ExceptionStackFrame *frame __attribute__( ( unused ) ),
     uint32_t cfsr = SCB->CFSR;   // Configurable Fault Status Registers
 #endif
 
-#if defined( OS_USE_SEMIHOSTING ) ||                                           \
-    defined( OS_USE_TRACE_SEMIHOSTING_STDOUT ) ||                              \
+#if defined( OS_USE_SEMIHOSTING ) || defined( OS_USE_TRACE_SEMIHOSTING_STDOUT ) ||                           \
     defined( OS_USE_TRACE_SEMIHOSTING_DEBUG )
 
     // If the BKPT instruction is executed with C_DEBUGEN == 0 and MON_EN == 0,
@@ -384,8 +371,7 @@ HardFault_Handler_C( ExceptionStackFrame *frame __attribute__( ( unused ) ),
     // in the Hard Fault Status register (HFSR) set to 1, and BKPT in the
     // Debug Fault Status register (DFSR) also set to 1.
 
-    if ( ( ( SCB->DFSR & SCB_DFSR_BKPT_Msk ) != 0 ) &&
-         ( ( SCB->HFSR & SCB_HFSR_DEBUGEVT_Msk ) != 0 ) )
+    if ( ( ( SCB->DFSR & SCB_DFSR_BKPT_Msk ) != 0 ) && ( ( SCB->HFSR & SCB_HFSR_DEBUGEVT_Msk ) != 0 ) )
     {
         if ( isSemihosting( frame, 0xBE00 + ( AngelSWI & 0xFF ) ) )
         {
@@ -423,8 +409,7 @@ HardFault_Handler_C( ExceptionStackFrame *frame __attribute__( ( unused ) ),
 // (Based on Joseph Yiu's, The Definitive Guide to ARM Cortex-M0
 // First Edition, Chap. 12.8, page 402).
 
-void __attribute__( ( section( ".after_vectors" ), weak, naked ) )
-HardFault_Handler( void )
+void __attribute__( ( section( ".after_vectors" ), weak, naked ) ) HardFault_Handler( void )
 {
     asm volatile( " movs r0,#4      \n"
                   " mov r1,lr       \n"
@@ -469,8 +454,7 @@ HardFault_Handler_C( ExceptionStackFrame *frame __attribute__( ( unused ) ),
 
 #if defined( __ARM_ARCH_7M__ ) || defined( __ARM_ARCH_7EM__ )
 
-void __attribute__( ( section( ".after_vectors" ), weak ) )
-MemManage_Handler( void )
+void __attribute__( ( section( ".after_vectors" ), weak ) ) MemManage_Handler( void )
 {
 #if defined( DEBUG )
     __DEBUG_BKPT();
@@ -480,8 +464,7 @@ MemManage_Handler( void )
     }
 }
 
-void __attribute__( ( section( ".after_vectors" ), weak, naked ) )
-BusFault_Handler( void )
+void __attribute__( ( section( ".after_vectors" ), weak, naked ) ) BusFault_Handler( void )
 {
     asm volatile( " tst lr,#4       \n"
                   " ite eq          \n"
@@ -518,8 +501,7 @@ BusFault_Handler_C( ExceptionStackFrame *frame __attribute__( ( unused ) ),
     }
 }
 
-void __attribute__( ( section( ".after_vectors" ), weak, naked ) )
-UsageFault_Handler( void )
+void __attribute__( ( section( ".after_vectors" ), weak, naked ) ) UsageFault_Handler( void )
 {
     asm volatile( " tst lr,#4       \n"
                   " ite eq          \n"
@@ -585,8 +567,7 @@ void __attribute__( ( section( ".after_vectors" ), weak ) ) SVC_Handler( void )
 
 #if defined( __ARM_ARCH_7M__ ) || defined( __ARM_ARCH_7EM__ )
 
-void __attribute__( ( section( ".after_vectors" ), weak ) )
-DebugMon_Handler( void )
+void __attribute__( ( section( ".after_vectors" ), weak ) ) DebugMon_Handler( void )
 {
 #if defined( DEBUG )
     __DEBUG_BKPT();
@@ -598,8 +579,7 @@ DebugMon_Handler( void )
 
 #endif
 
-void __attribute__( ( section( ".after_vectors" ), weak ) )
-PendSV_Handler( void )
+void __attribute__( ( section( ".after_vectors" ), weak ) ) PendSV_Handler( void )
 {
 #if defined( DEBUG )
     __DEBUG_BKPT();
@@ -609,8 +589,7 @@ PendSV_Handler( void )
     }
 }
 
-void __attribute__( ( section( ".after_vectors" ), weak ) )
-SysTick_Handler( void )
+void __attribute__( ( section( ".after_vectors" ), weak ) ) SysTick_Handler( void )
 {
     // DO NOT loop, just return.
     // Useful in case someone (like STM HAL) inadvertently enables SysTick.

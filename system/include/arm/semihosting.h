@@ -75,8 +75,7 @@ enum OperationNumber
 #define AngelSWI AngelSWI_ARM
 #endif
 // For thumb only architectures use the BKPT instruction instead of SWI.
-#if defined( __ARM_ARCH_7M__ ) || defined( __ARM_ARCH_7EM__ ) ||               \
-    defined( __ARM_ARCH_6M__ )
+#if defined( __ARM_ARCH_7M__ ) || defined( __ARM_ARCH_7EM__ ) || defined( __ARM_ARCH_6M__ )
 #define AngelSWIInsn "bkpt"
 #define AngelSWIAsm bkpt
 #else
@@ -93,8 +92,7 @@ enum OperationNumber
 #define AngelSWITestFaultOpCode ( 0xB658 )
 #endif
 
-static inline int __attribute__( ( always_inline ) ) call_host( int reason,
-                                                                void *arg )
+static inline int __attribute__( ( always_inline ) ) call_host( int reason, void *arg )
 {
     int value;
     asm volatile(
@@ -108,7 +106,7 @@ static inline int __attribute__( ( always_inline ) ) call_host( int reason,
 #endif
         " mov %[val], r0"
 
-        : [val] "=r"( value ) /* Outputs */
+        : [val] "=r"( value )                                          /* Outputs */
         : [rsn] "r"( reason ), [arg] "r"( arg ), [swi] "i"( AngelSWI ) /* Inputs
                                                                         */
         : "r0", "r1", "r2", "r3", "ip", "lr", "memory", "cc"
@@ -126,13 +124,11 @@ static inline int __attribute__( ( always_inline ) ) call_host( int reason,
 // ----------------------------------------------------------------------------
 
 // Function used in _exit() to return the status code as Angel exception.
-static inline void __attribute__( ( always_inline, noreturn ) )
-report_exception( int reason )
+static inline void __attribute__( ( always_inline, noreturn ) ) report_exception( int reason )
 {
     call_host( SEMIHOSTING_ReportException, (void *) reason );
 
-    for ( ;; )
-        ;
+    for ( ;; );
 }
 
 // ----------------------------------------------------------------------------

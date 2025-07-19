@@ -49,8 +49,7 @@
 #endif // !(defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__))
 
 #if defined( OS_DEBUG_SEMIHOSTING_FAULTS )
-#if defined( OS_USE_TRACE_SEMIHOSTING_STDOUT ) ||                              \
-    defined( OS_USE_TRACE_SEMIHOSTING_DEBUG )
+#if defined( OS_USE_TRACE_SEMIHOSTING_STDOUT ) || defined( OS_USE_TRACE_SEMIHOSTING_DEBUG )
 #error "Cannot debug semihosting using semihosting trace; use OS_USE_TRACE_ITM"
 #endif
 #endif
@@ -83,8 +82,7 @@ void trace_initialize( void )
 // This function is called from _write() for fd==1 or fd==2 and from some
 // of the trace_* functions.
 
-ssize_t trace_write( const char *buf __attribute__( ( unused ) ),
-                     size_t nbyte __attribute__( ( unused ) ) )
+ssize_t trace_write( const char *buf __attribute__( ( unused ) ), size_t nbyte __attribute__( ( unused ) ) )
 {
 #if defined( OS_USE_TRACE_ITM )
     return _trace_write_itm( buf, nbyte );
@@ -122,16 +120,13 @@ static ssize_t _trace_write_itm( const char *buf, size_t nbyte )
     {
         // Check if ITM or the stimulus port are not enabled
         if ( ( ( ITM->TCR & ITM_TCR_ITMENA_Msk ) == 0 ) ||
-             ( ( ITM->TER & ( 1UL << OS_INTEGER_TRACE_ITM_STIMULUS_PORT ) ) ==
-               0 ) )
+             ( ( ITM->TER & ( 1UL << OS_INTEGER_TRACE_ITM_STIMULUS_PORT ) ) == 0 ) )
         {
-            return (
-                ssize_t) i; // return the number of sent characters (may be 0)
+            return (ssize_t) i; // return the number of sent characters (may be 0)
         }
 
         // Wait until STIMx is ready...
-        while ( ITM->PORT[OS_INTEGER_TRACE_ITM_STIMULUS_PORT].u32 == 0 )
-            ;
+        while ( ITM->PORT[OS_INTEGER_TRACE_ITM_STIMULUS_PORT].u32 == 0 );
         // then send data, one byte at a time
         ITM->PORT[OS_INTEGER_TRACE_ITM_STIMULUS_PORT].u8 = (uint8_t) ( *buf++ );
     }
@@ -145,8 +140,7 @@ static ssize_t _trace_write_itm( const char *buf, size_t nbyte )
 
 // ----------------------------------------------------------------------------
 
-#if defined( OS_USE_TRACE_SEMIHOSTING_DEBUG ) ||                               \
-    defined( OS_USE_TRACE_SEMIHOSTING_STDOUT )
+#if defined( OS_USE_TRACE_SEMIHOSTING_DEBUG ) || defined( OS_USE_TRACE_SEMIHOSTING_STDOUT )
 
 #include "arm/semihosting.h"
 
@@ -244,8 +238,7 @@ static ssize_t _trace_write_semihosting_debug( const char *buf, size_t nbyte )
         size_t togo = nbyte;
         while ( togo > 0 )
         {
-            unsigned int n =
-                ( ( togo < sizeof( tmp ) ) ? togo : sizeof( tmp ) );
+            unsigned int n = ( ( togo < sizeof( tmp ) ) ? togo : sizeof( tmp ) );
             unsigned int i = 0;
             for ( ; i < n; ++i, ++buf )
             {

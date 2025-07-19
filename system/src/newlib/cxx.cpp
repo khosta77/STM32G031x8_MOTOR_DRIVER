@@ -53,13 +53,13 @@ void __verbose_terminate_handler()
 
 extern "C"
 {
-    void __attribute__( ( noreturn ) ) __cxa_pure_virtual();
+void __attribute__( ( noreturn ) ) __cxa_pure_virtual();
 
-    void __cxa_pure_virtual()
-    {
-        trace_puts( __func__ );
-        abort();
-    }
+void __cxa_pure_virtual()
+{
+    trace_puts( __func__ );
+    abort();
+}
 }
 
 // ----------------------------------------------------------------------------

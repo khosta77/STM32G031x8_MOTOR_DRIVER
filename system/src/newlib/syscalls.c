@@ -151,8 +151,7 @@ int _write( int file, char *ptr, int len );
 
 // Definitions
 
-int __attribute__( ( weak ) ) _chown( const char *path
-                                      __attribute__( ( unused ) ),
+int __attribute__( ( weak ) ) _chown( const char *path __attribute__( ( unused ) ),
                                       uid_t owner __attribute__( ( unused ) ),
                                       gid_t group __attribute__( ( unused ) ) )
 {
@@ -181,8 +180,7 @@ int __attribute__( ( weak ) ) _fork( void )
 }
 
 int __attribute__( ( weak ) ) _fstat( int fildes __attribute__( ( unused ) ),
-                                      struct stat *st
-                                      __attribute__( ( unused ) ) )
+                                      struct stat *st __attribute__( ( unused ) ) )
 {
     errno = ENOSYS;
     return -1;
@@ -194,10 +192,8 @@ int __attribute__( ( weak ) ) _getpid( void )
     return -1;
 }
 
-int __attribute__( ( weak ) ) _gettimeofday( struct timeval *ptimeval
-                                             __attribute__( ( unused ) ),
-                                             void *ptimezone
-                                             __attribute__( ( unused ) ) )
+int __attribute__( ( weak ) ) _gettimeofday( struct timeval *ptimeval __attribute__( ( unused ) ),
+                                             void *ptimezone __attribute__( ( unused ) ) )
 {
     errno = ENOSYS;
     return -1;
@@ -247,36 +243,29 @@ int __attribute__( ( weak ) ) _read( int file __attribute__( ( unused ) ),
     return -1;
 }
 
-int __attribute__( ( weak ) ) _readlink( const char *path
-                                         __attribute__( ( unused ) ),
+int __attribute__( ( weak ) ) _readlink( const char *path __attribute__( ( unused ) ),
                                          char *buf __attribute__( ( unused ) ),
-                                         size_t bufsize
-                                         __attribute__( ( unused ) ) )
+                                         size_t bufsize __attribute__( ( unused ) ) )
 {
     errno = ENOSYS;
     return -1;
 }
 
-int __attribute__( ( weak ) ) _stat( const char *file
-                                     __attribute__( ( unused ) ),
-                                     struct stat *st
-                                     __attribute__( ( unused ) ) )
+int __attribute__( ( weak ) ) _stat( const char *file __attribute__( ( unused ) ),
+                                     struct stat *st __attribute__( ( unused ) ) )
 {
     errno = ENOSYS;
     return -1;
 }
 
-int __attribute__( ( weak ) ) _symlink( const char *path1
-                                        __attribute__( ( unused ) ),
-                                        const char *path2
-                                        __attribute__( ( unused ) ) )
+int __attribute__( ( weak ) ) _symlink( const char *path1 __attribute__( ( unused ) ),
+                                        const char *path2 __attribute__( ( unused ) ) )
 {
     errno = ENOSYS;
     return -1;
 }
 
-clock_t __attribute__( ( weak ) ) _times( struct tms *buf
-                                          __attribute__( ( unused ) ) )
+clock_t __attribute__( ( weak ) ) _times( struct tms *buf __attribute__( ( unused ) ) )
 {
     errno = ENOSYS;
     return ( (clock_t) -1 );
@@ -417,9 +406,7 @@ void __initialize_args( int *p_argc, char ***p_argv )
             {
                 if ( !isblank( ch ) )
                 {
-                    if ( argc >= (int) ( ( sizeof( argv_buf ) /
-                                           sizeof( argv_buf[0] ) ) -
-                                         1 ) )
+                    if ( argc >= (int) ( ( sizeof( argv_buf ) / sizeof( argv_buf[0] ) ) - 1 ) )
                         break;
 
                     if ( ch == '"' || ch == '\'' )
@@ -483,8 +470,7 @@ void _exit( int status )
      signum, so that the SWI handler can distinguish the two calls.
      Note: The RDI implementation of _kill throws away both its
      arguments.  */
-    report_exception( status == 0 ? ADP_Stopped_ApplicationExit
-                                  : ADP_Stopped_RunTimeError );
+    report_exception( status == 0 ? ADP_Stopped_ApplicationExit : ADP_Stopped_RunTimeError );
 }
 
 // ----------------------------------------------------------------------------
@@ -633,10 +619,7 @@ void initialise_monitor_handles( void )
     openfiles[2].pos = 0;
 }
 
-static int get_errno( void )
-{
-    return call_host( SEMIHOSTING_SYS_ERRNO, NULL );
-}
+static int get_errno( void ) { return call_host( SEMIHOSTING_SYS_ERRNO, NULL ); }
 
 /* Set errno and return result. */
 static int error( int result )
@@ -887,16 +870,10 @@ int _swiopen( const char *path, int flags )
     }
 }
 
-int _open( const char *path, int flags, ... )
-{
-    return _swiopen( path, flags );
-}
+int _open( const char *path, int flags, ... ) { return _swiopen( path, flags ); }
 
 /* fh, is a valid internal file handle. */
-int _swiclose( int fh )
-{
-    return checkerror( call_host( SEMIHOSTING_SYS_CLOSE, &fh ) );
-}
+int _swiclose( int fh ) { return checkerror( call_host( SEMIHOSTING_SYS_CLOSE, &fh ) ); }
 
 /* fd, is a user file descriptor. */
 int _close( int fd )
@@ -912,8 +889,7 @@ int _close( int fd )
     }
 
     /* Handle stderr == stdout. */
-    if ( ( fd == 1 || fd == 2 ) &&
-         ( openfiles[1].handle == openfiles[2].handle ) )
+    if ( ( fd == 1 || fd == 2 ) && ( openfiles[1].handle == openfiles[2].handle ) )
     {
         pfd->handle = -1;
         return 0;
@@ -931,10 +907,7 @@ int _close( int fd )
     return res;
 }
 
-int __attribute__( ( weak ) ) _getpid( int n __attribute__( ( unused ) ) )
-{
-    return 1;
-}
+int __attribute__( ( weak ) ) _getpid( int n __attribute__( ( unused ) ) ) { return 1; }
 
 int _swistat( int fd, struct stat *st )
 {
@@ -1118,8 +1091,7 @@ int _rename( const char *oldpath, const char *newpath )
 // ----------------------------------------------------------------------------
 // Required by Google Tests
 
-int mkdir( const char *path __attribute__( ( unused ) ),
-           mode_t mode __attribute__( ( unused ) ) )
+int mkdir( const char *path __attribute__( ( unused ) ), mode_t mode __attribute__( ( unused ) ) )
 {
 #if 0
   // always return true

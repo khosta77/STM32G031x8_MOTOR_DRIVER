@@ -1,6 +1,8 @@
 /**************************************************************************/ /**
                                                                               * @file     cmsis_armclang.h
-                                                                              * @brief    CMSIS compiler armclang (Arm Compiler 6) header file
+                                                                              * @brief    CMSIS compiler
+                                                                              *armclang (Arm Compiler 6)
+                                                                              *header file
                                                                               * @version  V5.2.0
                                                                               * @date     08. May 2019
                                                                               ******************************************************************************/
@@ -82,7 +84,7 @@ struct __attribute__( ( packed ) ) T_UINT32
                                         T_UINT16_WRITE */
 __PACKED_STRUCT T_UINT16_WRITE { uint16_t v; };
 #pragma clang diagnostic pop
-#define __UNALIGNED_UINT16_WRITE( addr, val )                                  \
+#define __UNALIGNED_UINT16_WRITE( addr, val )                                                                \
     (void) ( ( ( (struct T_UINT16_WRITE *) (void *) ( addr ) )->v ) = ( val ) )
 #endif
 #ifndef __UNALIGNED_UINT16_READ
@@ -92,8 +94,7 @@ __PACKED_STRUCT T_UINT16_WRITE { uint16_t v; };
                                        T_UINT16_READ */
 __PACKED_STRUCT T_UINT16_READ { uint16_t v; };
 #pragma clang diagnostic pop
-#define __UNALIGNED_UINT16_READ( addr )                                        \
-    ( ( (const struct T_UINT16_READ *) (const void *) ( addr ) )->v )
+#define __UNALIGNED_UINT16_READ( addr ) ( ( (const struct T_UINT16_READ *) (const void *) ( addr ) )->v )
 #endif
 #ifndef __UNALIGNED_UINT32_WRITE
 #pragma clang diagnostic push
@@ -102,7 +103,7 @@ __PACKED_STRUCT T_UINT16_READ { uint16_t v; };
                                         T_UINT32_WRITE */
 __PACKED_STRUCT T_UINT32_WRITE { uint32_t v; };
 #pragma clang diagnostic pop
-#define __UNALIGNED_UINT32_WRITE( addr, val )                                  \
+#define __UNALIGNED_UINT32_WRITE( addr, val )                                                                \
     (void) ( ( ( (struct T_UINT32_WRITE *) (void *) ( addr ) )->v ) = ( val ) )
 #endif
 #ifndef __UNALIGNED_UINT32_READ
@@ -112,8 +113,7 @@ __PACKED_STRUCT T_UINT32_WRITE { uint32_t v; };
                                        T_UINT32_READ */
 __PACKED_STRUCT T_UINT32_READ { uint32_t v; };
 #pragma clang diagnostic pop
-#define __UNALIGNED_UINT32_READ( addr )                                        \
-    ( ( (const struct T_UINT32_READ *) (const void *) ( addr ) )->v )
+#define __UNALIGNED_UINT32_READ( addr ) ( ( (const struct T_UINT32_READ *) (const void *) ( addr ) )->v )
 #endif
 #ifndef __ALIGNED
 #define __ALIGNED( x ) __attribute__( ( aligned( x ) ) )
@@ -444,8 +444,8 @@ __STATIC_FORCEINLINE void __TZ_set_PRIMASK_NS( uint32_t priMask )
 }
 #endif
 
-#if ( ( defined( __ARM_ARCH_7M__ ) && ( __ARM_ARCH_7M__ == 1 ) ) ||            \
-      ( defined( __ARM_ARCH_7EM__ ) && ( __ARM_ARCH_7EM__ == 1 ) ) ||          \
+#if ( ( defined( __ARM_ARCH_7M__ ) && ( __ARM_ARCH_7M__ == 1 ) ) ||                                          \
+      ( defined( __ARM_ARCH_7EM__ ) && ( __ARM_ARCH_7EM__ == 1 ) ) ||                                        \
       ( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) )
 /**
   \brief   Enable FIQ
@@ -576,12 +576,12 @@ __STATIC_FORCEINLINE void __TZ_set_FAULTMASK_NS( uint32_t faultMask )
 }
 #endif
 
-#endif /* ((defined (__ARM_ARCH_7M__      ) && (__ARM_ARCH_7M__      == 1)) || \
-           (defined (__ARM_ARCH_7EM__     ) && (__ARM_ARCH_7EM__     == 1)) || \
-           (defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) )                                                                             \
+#endif /* ((defined (__ARM_ARCH_7M__      ) && (__ARM_ARCH_7M__      == 1)) ||                               \
+           (defined (__ARM_ARCH_7EM__     ) && (__ARM_ARCH_7EM__     == 1)) ||                               \
+           (defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) )                                \
         */
 
-#if ( ( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) ||  \
+#if ( ( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) ||                                \
       ( defined( __ARM_ARCH_8M_BASE__ ) && ( __ARM_ARCH_8M_BASE__ == 1 ) ) )
 
 /**
@@ -596,7 +596,7 @@ __STATIC_FORCEINLINE void __TZ_set_FAULTMASK_NS( uint32_t faultMask )
  */
 __STATIC_FORCEINLINE uint32_t __get_PSPLIM( void )
 {
-#if ( !( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) && \
+#if ( !( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) &&                               \
       ( !defined( __ARM_FEATURE_CMSE ) || ( __ARM_FEATURE_CMSE < 3 ) ) )
     // without main extensions, the non-secure PSPLIM is RAZ/WI
     return 0U;
@@ -642,7 +642,7 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_PSPLIM_NS( void )
  */
 __STATIC_FORCEINLINE void __set_PSPLIM( uint32_t ProcStackPtrLimit )
 {
-#if ( !( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) && \
+#if ( !( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) &&                               \
       ( !defined( __ARM_FEATURE_CMSE ) || ( __ARM_FEATURE_CMSE < 3 ) ) )
     // without main extensions, the non-secure PSPLIM is RAZ/WI
     (void) ProcStackPtrLimit;
@@ -683,7 +683,7 @@ __STATIC_FORCEINLINE void __TZ_set_PSPLIM_NS( uint32_t ProcStackPtrLimit )
  */
 __STATIC_FORCEINLINE uint32_t __get_MSPLIM( void )
 {
-#if ( !( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) && \
+#if ( !( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) &&                               \
       ( !defined( __ARM_FEATURE_CMSE ) || ( __ARM_FEATURE_CMSE < 3 ) ) )
     // without main extensions, the non-secure MSPLIM is RAZ/WI
     return 0U;
@@ -727,7 +727,7 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_MSPLIM_NS( void )
  */
 __STATIC_FORCEINLINE void __set_MSPLIM( uint32_t MainStackPtrLimit )
 {
-#if ( !( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) && \
+#if ( !( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) &&                               \
       ( !defined( __ARM_FEATURE_CMSE ) || ( __ARM_FEATURE_CMSE < 3 ) ) )
     // without main extensions, the non-secure MSPLIM is RAZ/WI
     (void) MainStackPtrLimit;
@@ -757,8 +757,8 @@ __STATIC_FORCEINLINE void __TZ_set_MSPLIM_NS( uint32_t MainStackPtrLimit )
 }
 #endif
 
-#endif /* ((defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) || \
-           (defined (__ARM_ARCH_8M_BASE__ ) && (__ARM_ARCH_8M_BASE__ == 1)) )                                                                             \
+#endif /* ((defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) ||                               \
+           (defined (__ARM_ARCH_8M_BASE__ ) && (__ARM_ARCH_8M_BASE__ == 1)) )                                \
         */
 
 /**
@@ -767,7 +767,7 @@ __STATIC_FORCEINLINE void __TZ_set_MSPLIM_NS( uint32_t MainStackPtrLimit )
   register.
   \return               Floating Point Status/Control register value
  */
-#if ( ( defined( __FPU_PRESENT ) && ( __FPU_PRESENT == 1U ) ) &&               \
+#if ( ( defined( __FPU_PRESENT ) && ( __FPU_PRESENT == 1U ) ) &&                                             \
       ( defined( __FPU_USED ) && ( __FPU_USED == 1U ) ) )
 #define __get_FPSCR (uint32_t) __builtin_arm_get_fpscr
 #else
@@ -780,7 +780,7 @@ __STATIC_FORCEINLINE void __TZ_set_MSPLIM_NS( uint32_t MainStackPtrLimit )
   register.
   \param [in]    fpscr  Floating Point Status/Control value to set
  */
-#if ( ( defined( __FPU_PRESENT ) && ( __FPU_PRESENT == 1U ) ) &&               \
+#if ( ( defined( __FPU_PRESENT ) && ( __FPU_PRESENT == 1U ) ) &&                                             \
       ( defined( __FPU_USED ) && ( __FPU_USED == 1U ) ) )
 #define __set_FPSCR __builtin_arm_set_fpscr
 #else
@@ -948,9 +948,9 @@ __STATIC_FORCEINLINE uint8_t __CLZ( uint32_t value )
     return __builtin_clz( value );
 }
 
-#if ( ( defined( __ARM_ARCH_7M__ ) && ( __ARM_ARCH_7M__ == 1 ) ) ||            \
-      ( defined( __ARM_ARCH_7EM__ ) && ( __ARM_ARCH_7EM__ == 1 ) ) ||          \
-      ( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) ||  \
+#if ( ( defined( __ARM_ARCH_7M__ ) && ( __ARM_ARCH_7M__ == 1 ) ) ||                                          \
+      ( defined( __ARM_ARCH_7EM__ ) && ( __ARM_ARCH_7EM__ == 1 ) ) ||                                        \
+      ( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) ||                                \
       ( defined( __ARM_ARCH_8M_BASE__ ) && ( __ARM_ARCH_8M_BASE__ == 1 ) ) )
 /**
   \brief   LDR Exclusive (8 bit)
@@ -1012,14 +1012,14 @@ __STATIC_FORCEINLINE uint8_t __CLZ( uint32_t value )
  */
 #define __CLREX __builtin_arm_clrex
 
-#endif /* ((defined (__ARM_ARCH_7M__      ) && (__ARM_ARCH_7M__      == 1)) || \
-           (defined (__ARM_ARCH_7EM__     ) && (__ARM_ARCH_7EM__     == 1)) || \
-           (defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) || \
-           (defined (__ARM_ARCH_8M_BASE__ ) && (__ARM_ARCH_8M_BASE__ == 1)) )                                                                             \
+#endif /* ((defined (__ARM_ARCH_7M__      ) && (__ARM_ARCH_7M__      == 1)) ||                               \
+           (defined (__ARM_ARCH_7EM__     ) && (__ARM_ARCH_7EM__     == 1)) ||                               \
+           (defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) ||                               \
+           (defined (__ARM_ARCH_8M_BASE__ ) && (__ARM_ARCH_8M_BASE__ == 1)) )                                \
         */
 
-#if ( ( defined( __ARM_ARCH_7M__ ) && ( __ARM_ARCH_7M__ == 1 ) ) ||            \
-      ( defined( __ARM_ARCH_7EM__ ) && ( __ARM_ARCH_7EM__ == 1 ) ) ||          \
+#if ( ( defined( __ARM_ARCH_7M__ ) && ( __ARM_ARCH_7M__ == 1 ) ) ||                                          \
+      ( defined( __ARM_ARCH_7EM__ ) && ( __ARM_ARCH_7EM__ == 1 ) ) ||                                        \
       ( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) )
 
 /**
@@ -1051,8 +1051,7 @@ __STATIC_FORCEINLINE uint32_t __RRX( uint32_t value )
 {
     uint32_t result;
 
-    __ASM volatile( "rrx %0, %1" : __CMSIS_GCC_OUT_REG(
-        result ) : __CMSIS_GCC_USE_REG( value ) );
+    __ASM volatile( "rrx %0, %1" : __CMSIS_GCC_OUT_REG( result ) : __CMSIS_GCC_USE_REG( value ) );
     return ( result );
 }
 
@@ -1131,9 +1130,9 @@ __STATIC_FORCEINLINE void __STRT( uint32_t value, volatile uint32_t *ptr )
     __ASM volatile( "strt %1, %0" : "=Q"( *ptr ) : "r"( value ) );
 }
 
-#else /* ((defined (__ARM_ARCH_7M__      ) && (__ARM_ARCH_7M__      == 1)) ||  \
-          (defined (__ARM_ARCH_7EM__     ) && (__ARM_ARCH_7EM__     == 1)) ||  \
-          (defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) )                                                                             \
+#else /* ((defined (__ARM_ARCH_7M__      ) && (__ARM_ARCH_7M__      == 1)) ||                                \
+          (defined (__ARM_ARCH_7EM__     ) && (__ARM_ARCH_7EM__     == 1)) ||                                \
+          (defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) )                                 \
        */
 
 /**
@@ -1185,12 +1184,12 @@ __STATIC_FORCEINLINE uint32_t __USAT( int32_t val, uint32_t sat )
     return (uint32_t) val;
 }
 
-#endif /* ((defined (__ARM_ARCH_7M__      ) && (__ARM_ARCH_7M__      == 1)) || \
-           (defined (__ARM_ARCH_7EM__     ) && (__ARM_ARCH_7EM__     == 1)) || \
-           (defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) )                                                                             \
+#endif /* ((defined (__ARM_ARCH_7M__      ) && (__ARM_ARCH_7M__      == 1)) ||                               \
+           (defined (__ARM_ARCH_7EM__     ) && (__ARM_ARCH_7EM__     == 1)) ||                               \
+           (defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) )                                \
         */
 
-#if ( ( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) ||  \
+#if ( ( defined( __ARM_ARCH_8M_MAIN__ ) && ( __ARM_ARCH_8M_MAIN__ == 1 ) ) ||                                \
       ( defined( __ARM_ARCH_8M_BASE__ ) && ( __ARM_ARCH_8M_BASE__ == 1 ) ) )
 /**
   \brief   Load-Acquire (8 bit)
@@ -1321,8 +1320,8 @@ __STATIC_FORCEINLINE void __STL( uint32_t value, volatile uint32_t *ptr )
  */
 #define __STLEX (uint32_t) __builtin_arm_stlex
 
-#endif /* ((defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) || \
-           (defined (__ARM_ARCH_8M_BASE__ ) && (__ARM_ARCH_8M_BASE__ == 1)) )                                                                             \
+#endif /* ((defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) ||                               \
+           (defined (__ARM_ARCH_8M_BASE__ ) && (__ARM_ARCH_8M_BASE__ == 1)) )                                \
         */
 
 /*@}*/ /* end of group CMSIS_Core_InstructionInterface */
@@ -1396,20 +1395,19 @@ __STATIC_FORCEINLINE void __STL( uint32_t value, volatile uint32_t *ptr )
 #define __QADD __builtin_arm_qadd
 #define __QSUB __builtin_arm_qsub
 
-#define __PKHBT( ARG1, ARG2, ARG3 )                                            \
-    ( ( ( ( (uint32_t) ( ARG1 ) ) ) & 0x0000FFFFUL ) |                         \
+#define __PKHBT( ARG1, ARG2, ARG3 )                                                                          \
+    ( ( ( ( (uint32_t) ( ARG1 ) ) ) & 0x0000FFFFUL ) |                                                       \
       ( ( ( (uint32_t) ( ARG2 ) ) << ( ARG3 ) ) & 0xFFFF0000UL ) )
 
-#define __PKHTB( ARG1, ARG2, ARG3 )                                            \
-    ( ( ( ( (uint32_t) ( ARG1 ) ) ) & 0xFFFF0000UL ) |                         \
+#define __PKHTB( ARG1, ARG2, ARG3 )                                                                          \
+    ( ( ( ( (uint32_t) ( ARG1 ) ) ) & 0xFFFF0000UL ) |                                                       \
       ( ( ( (uint32_t) ( ARG2 ) ) >> ( ARG3 ) ) & 0x0000FFFFUL ) )
 
 __STATIC_FORCEINLINE int32_t __SMMLA( int32_t op1, int32_t op2, int32_t op3 )
 {
     int32_t result;
 
-    __ASM volatile( "smmla %0, %1, %2, %3" : "=r"( result ) : "r"( op1 ),
-                    "r"( op2 ), "r"( op3 ) );
+    __ASM volatile( "smmla %0, %1, %2, %3" : "=r"( result ) : "r"( op1 ), "r"( op2 ), "r"( op3 ) );
     return ( result );
 }
 

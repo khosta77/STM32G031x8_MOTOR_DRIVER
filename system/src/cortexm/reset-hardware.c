@@ -47,9 +47,6 @@ void __reset_hardware( void );
 //
 // Called from _exit().
 
-void __attribute__( ( weak, noreturn ) ) __reset_hardware()
-{
-    NVIC_SystemReset();
-}
+void __attribute__( ( weak, noreturn ) ) __reset_hardware() { NVIC_SystemReset(); }
 
 // ----------------------------------------------------------------------------

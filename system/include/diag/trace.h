@@ -62,20 +62,20 @@ extern "C"
 {
 #endif
 
-    void trace_initialize( void );
+void trace_initialize( void );
 
-    // Implementation dependent
-    ssize_t trace_write( const char *buf, size_t nbyte );
+// Implementation dependent
+ssize_t trace_write( const char *buf, size_t nbyte );
 
-    // ----- Portable -----
+// ----- Portable -----
 
-    int trace_printf( const char *format, ... );
+int trace_printf( const char *format, ... );
 
-    int trace_puts( const char *s );
+int trace_puts( const char *s );
 
-    int trace_putchar( int c );
+int trace_putchar( int c );
 
-    void trace_dump_args( int argc, char *argv[] );
+void trace_dump_args( int argc, char *argv[] );
 
 #if defined( __cplusplus )
 }
@@ -88,18 +88,18 @@ extern "C"
 {
 #endif
 
-    inline void trace_initialize( void );
+inline void trace_initialize( void );
 
-    // Implementation dependent
-    inline ssize_t trace_write( const char *buf, size_t nbyte );
+// Implementation dependent
+inline ssize_t trace_write( const char *buf, size_t nbyte );
 
-    inline int trace_printf( const char *format, ... );
+inline int trace_printf( const char *format, ... );
 
-    inline int trace_puts( const char *s );
+inline int trace_puts( const char *s );
 
-    inline int trace_putchar( int c );
+inline int trace_putchar( int c );
 
-    inline void trace_dump_args( int argc, char *argv[] );
+inline void trace_dump_args( int argc, char *argv[] );
 
 #if defined( __cplusplus )
 }
@@ -108,33 +108,27 @@ extern "C"
 inline void __attribute__( ( always_inline ) ) trace_initialize( void ) {}
 
 // Empty definitions when trace is not defined
-inline ssize_t __attribute__( ( always_inline ) )
-trace_write( const char *buf __attribute__( ( unused ) ),
-             size_t nbyte __attribute__( ( unused ) ) )
+inline ssize_t __attribute__( ( always_inline ) ) trace_write( const char *buf __attribute__( ( unused ) ),
+                                                               size_t nbyte __attribute__( ( unused ) ) )
 {
     return 0;
 }
 
-inline int __attribute__( ( always_inline ) )
-trace_printf( const char *format __attribute__( ( unused ) ), ... )
+inline int __attribute__( ( always_inline ) ) trace_printf( const char *format __attribute__( ( unused ) ),
+                                                            ... )
 {
     return 0;
 }
 
-inline int __attribute__( ( always_inline ) )
-trace_puts( const char *s __attribute__( ( unused ) ) )
+inline int __attribute__( ( always_inline ) ) trace_puts( const char *s __attribute__( ( unused ) ) )
 {
     return 0;
 }
 
-inline int __attribute__( ( always_inline ) ) trace_putchar( int c )
-{
-    return c;
-}
+inline int __attribute__( ( always_inline ) ) trace_putchar( int c ) { return c; }
 
-inline void __attribute__( ( always_inline ) )
-trace_dump_args( int argc __attribute__( ( unused ) ),
-                 char *argv[] __attribute__( ( unused ) ) )
+inline void __attribute__( ( always_inline ) ) trace_dump_args( int argc __attribute__( ( unused ) ),
+                                                                char *argv[] __attribute__( ( unused ) ) )
 {
 }
 

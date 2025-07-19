@@ -121,18 +121,18 @@
      in Sram else user remap will be done in Flash. */
 /* #define VECT_TAB_SRAM */
 #if defined( VECT_TAB_SRAM )
-#define VECT_TAB_BASE_ADDRESS                                                  \
-    SRAM_BASE /*!< Vector Table base address field.                            \
+#define VECT_TAB_BASE_ADDRESS                                                                                \
+    SRAM_BASE /*!< Vector Table base address field.                                                          \
                    This value must be a multiple of 0x200. */
-#define VECT_TAB_OFFSET                                                        \
-    0x00000000U /*!< Vector Table base offset field.                           \
+#define VECT_TAB_OFFSET                                                                                      \
+    0x00000000U /*!< Vector Table base offset field.                                                         \
                      This value must be a multiple of 0x200. */
 #else
-#define VECT_TAB_BASE_ADDRESS                                                  \
-    FLASH_BASE /*!< Vector Table base address field.                           \
+#define VECT_TAB_BASE_ADDRESS                                                                                \
+    FLASH_BASE /*!< Vector Table base address field.                                                         \
                     This value must be a multiple of 0x200. */
-#define VECT_TAB_OFFSET                                                        \
-    0x00000000U /*!< Vector Table base offset field.                           \
+#define VECT_TAB_OFFSET                                                                                      \
+    0x00000000U /*!< Vector Table base offset field.                                                         \
                      This value must be a multiple of 0x200. */
 #endif          /* VECT_TAB_SRAM */
 #endif          /* USER_VECT_TAB_ADDRESS */
@@ -192,9 +192,8 @@ void SystemInit( void )
     /* Configure the Vector Table location
      * -------------------------------------*/
 #if defined( USER_VECT_TAB_ADDRESS )
-    SCB->VTOR =
-        VECT_TAB_BASE_ADDRESS | VECT_TAB_OFFSET; /* Vector Table Relocation */
-#endif                                           /* USER_VECT_TAB_ADDRESS */
+    SCB->VTOR = VECT_TAB_BASE_ADDRESS | VECT_TAB_OFFSET; /* Vector Table Relocation */
+#endif                                                   /* USER_VECT_TAB_ADDRESS */
 }
 
 /**
@@ -271,9 +270,7 @@ void SystemCoreClockUpdate( void )
                SYSCLK = PLL_VCO / PLLR
                */
             pllsource = ( RCC->PLLCFGR & RCC_PLLCFGR_PLLSRC );
-            pllm = ( ( RCC->PLLCFGR & RCC_PLLCFGR_PLLM ) >>
-                     RCC_PLLCFGR_PLLM_Pos ) +
-                   1UL;
+            pllm = ( ( RCC->PLLCFGR & RCC_PLLCFGR_PLLM ) >> RCC_PLLCFGR_PLLM_Pos ) + 1UL;
 
             if ( pllsource == 0x03UL ) /* HSE used as PLL clock source */
             {
@@ -283,19 +280,15 @@ void SystemCoreClockUpdate( void )
             {
                 pllvco = ( HSI_VALUE / pllm );
             }
-            pllvco = pllvco * ( ( RCC->PLLCFGR & RCC_PLLCFGR_PLLN ) >>
-                                RCC_PLLCFGR_PLLN_Pos );
-            pllr = ( ( ( RCC->PLLCFGR & RCC_PLLCFGR_PLLR ) >>
-                       RCC_PLLCFGR_PLLR_Pos ) +
-                     1UL );
+            pllvco = pllvco * ( ( RCC->PLLCFGR & RCC_PLLCFGR_PLLN ) >> RCC_PLLCFGR_PLLN_Pos );
+            pllr = ( ( ( RCC->PLLCFGR & RCC_PLLCFGR_PLLR ) >> RCC_PLLCFGR_PLLR_Pos ) + 1UL );
 
             SystemCoreClock = pllvco / pllr;
             break;
 
         case 0x00000000U: /* HSI used as system clock */
         default:          /* HSI used as system clock */
-            hsidiv = ( 1UL << ( ( READ_BIT( RCC->CR, RCC_CR_HSIDIV ) ) >>
-                                RCC_CR_HSIDIV_Pos ) );
+            hsidiv = ( 1UL << ( ( READ_BIT( RCC->CR, RCC_CR_HSIDIV ) ) >> RCC_CR_HSIDIV_Pos ) );
             SystemCoreClock = ( HSI_VALUE / hsidiv );
             break;
     }
