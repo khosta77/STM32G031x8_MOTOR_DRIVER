@@ -1,8 +1,17 @@
-C_SRCS += ./src/main.cpp
+C_SRCS += ./src/main.cpp \
+		  ./src/usart.cpp \
+		  ./src/exti.cpp \
+		  ./src/stepper.cpp
 
-C_DEPS += ./src/main.d
+C_DEPS += ./src/main.d \
+		  ./src/usart.d \
+		  ./src/exti.d \
+		  ./src/stepper.d
 
-OBJS += ./src/main.o
+OBJS += ./src/main.o \
+		./src/usart.o \
+		./src/exti.o \
+		./src/stepper.o
 
 src/%.o: ./src/%.cpp src/subdir.mk
 	@echo 'Building file: $<'
