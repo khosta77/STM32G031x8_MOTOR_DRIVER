@@ -1,8 +1,6 @@
 #ifndef SYSTEMCORECLOCKSET_HPP_
 #define SYSTEMCORECLOCKSET_HPP_
 
-#include "stm32g0xx.h"
-
 /*
  * https://github.com/olikraus/stm32g031/blob/main/common/sys_util.c
  * */
