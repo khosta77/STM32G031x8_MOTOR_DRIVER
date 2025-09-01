@@ -25,103 +25,103 @@ union MotorSettingsFromMessage
 
 uint8_t msfm_i = 0;
 
-#define MSFM_MRK_MODE 0x01   // if 1 - msfm1 else msfm2
-#define MSFM_MRK_READY 0x02  // if 1 ready else no ready
+#define MSFM_MRK_MODE   0x01 // if 1 - msfm1 else msfm2
+#define MSFM_MRK_READY  0x02 // if 1 ready else no ready
 #define MSFM_MRK_MOVING 0x04 // if 1 moving
 #define MSFM_MRK_FINISH 0x08 // if 1 finish
-#define MSFM_MRK_EN 0x80     // enable status
+#define MSFM_MRK_EN     0x80 // enable status
 uint8_t msfm_mrk = 0b00000001;
 
-Stepper stepper_( TIM2_NVIC_PRIORITY );
+Stepper stepper_(TIM2_NVIC_PRIORITY);
 
 extern "C"
 {
-void __attribute__( ( interrupt, used ) ) USART1_IRQHandler( void )
+void __attribute__((interrupt, used)) USART1_IRQHandler(void)
 {
-    if ( READ_BIT( USART1->ISR, USART_ISR_RXNE_RXFNE ) == USART_ISR_RXNE_RXFNE )
+    if (READ_BIT(USART1->ISR, USART_ISR_RXNE_RXFNE) == USART_ISR_RXNE_RXFNE)
     {
-        if ( READ_BIT( msfm_mrk, MSFM_MRK_EN ) != MSFM_MRK_EN )
+        if (READ_BIT(msfm_mrk, MSFM_MRK_EN) != MSFM_MRK_EN)
         {
-            (void) USART1->RDR;
+            (void)USART1->RDR;
             return;
         }
 
         // uint32_t primask = __get_PRIMASK(); // get the interrupt status
         // __disable_irq();           // disable IRQs, this will modify PRIMASK
 
-        if ( READ_BIT( msfm_mrk, MSFM_MRK_MODE ) == MSFM_MRK_MODE )
+        if (READ_BIT(msfm_mrk, MSFM_MRK_MODE) == MSFM_MRK_MODE)
         {
-            msfm1._frame[msfm_i++] = ( USART1->RDR + 1 );
+            msfm1._frame[msfm_i++] = (USART1->RDR + 1);
         }
         else
         {
-            msfm2._frame[msfm_i++] = ( USART1->RDR + 1 );
+            msfm2._frame[msfm_i++] = (USART1->RDR + 1);
         }
 
-        if ( msfm_i == 12 )
+        if (msfm_i == 12)
         {
             msfm_i = 0;
-            if ( READ_BIT( msfm_mrk, MSFM_MRK_MODE ) == MSFM_MRK_MODE )
+            if (READ_BIT(msfm_mrk, MSFM_MRK_MODE) == MSFM_MRK_MODE)
             {
-                CLEAR_BIT( msfm_mrk, MSFM_MRK_MODE );
+                CLEAR_BIT(msfm_mrk, MSFM_MRK_MODE);
             }
             else
             {
-                SET_BIT( msfm_mrk, MSFM_MRK_MODE );
+                SET_BIT(msfm_mrk, MSFM_MRK_MODE);
             }
         }
 
-        SET_BIT( msfm_mrk, MSG_STATUS );
+        SET_BIT(msfm_mrk, MSG_STATUS);
         // __set_PRIMASK( primask ); // restore interrupt state
 
         return;
     }
 }
 
-void __attribute__( ( interrupt, used ) ) EXTI4_15_IRQHandler( void )
+void __attribute__((interrupt, used)) EXTI4_15_IRQHandler(void)
 {
     //// EN
     // Включение работы
-    if ( EXTI->RPR1 & EXTI_RPR1_RPIF4 )
+    if (EXTI->RPR1 & EXTI_RPR1_RPIF4)
     {
         uint32_t primask = __get_PRIMASK(); // get the interrupt status
         __disable_irq();                    // disable IRQs, this will modify PRIMASK
 
         // TODO: Включение работы
-        SET_BIT( msfm_mrk, MSFM_MRK_EN );
+        SET_BIT(msfm_mrk, MSFM_MRK_EN);
         // on exti    | stop-end      | SELECT        |
-        EXTI->IMR1 |= ( EXTI_IMR1_IM3 | EXTI_IMR1_IM5 );
+        EXTI->IMR1 |= (EXTI_IMR1_IM3 | EXTI_IMR1_IM5);
         GPIOA->ODR |= GPIO_ODR_OD3;
         EXTI->RPR1 = EXTI_RPR1_RPIF4;
 
-        __set_PRIMASK( primask ); // restore interrupt state
+        __set_PRIMASK(primask); // restore interrupt state
         return;
     }
 
     // Остановка работы при переводе ENABLE в 0 останавливается работа и перемещение
-    if ( EXTI->FPR1 & EXTI_FPR1_FPIF4 )
+    if (EXTI->FPR1 & EXTI_FPR1_FPIF4)
     {
         uint32_t primask = __get_PRIMASK(); // get the interrupt status
         __disable_irq();                    // disable IRQs, this will modify PRIMASK
 
-        CLEAR_BIT( msfm_mrk, MSFM_MRK_EN );
+        CLEAR_BIT(msfm_mrk, MSFM_MRK_EN);
         USART1->CR1 &= ~USART_CR1_UE;
         TIM2->CR1 &= ~TIM_CR1_CEN;
         // off         | step         | dir          | en           | STATUSx      |
-        GPIOA->ODR &= ~( GPIO_ODR_OD1 | GPIO_ODR_OD2 | GPIO_ODR_OD3 | GPIO_ODR_OD6 );
+        GPIOA->ODR &= ~(GPIO_ODR_OD1 | GPIO_ODR_OD2 | GPIO_ODR_OD3 | GPIO_ODR_OD6);
         // off exti    | stop-end      | SELECT        |
-        EXTI->IMR1 &= ~( EXTI_IMR1_IM3 | EXTI_IMR1_IM5 );
+        EXTI->IMR1 &= ~(EXTI_IMR1_IM3 | EXTI_IMR1_IM5);
 
         EXTI->FPR1 = EXTI_FPR1_FPIF4;
 
-        __set_PRIMASK( primask ); // restore interrupt state
+        __set_PRIMASK(primask); // restore interrupt state
         return;
     }
 
     //// SELECT
-    if ( EXTI->RPR1 & EXTI_RPR1_RPIF5 )
+    if (EXTI->RPR1 & EXTI_RPR1_RPIF5)
     {
-        if ( READ_BIT( msfm_mrk, MSFM_MRK_EN ) != MSFM_MRK_EN )
+        if (READ_BIT(msfm_mrk, MSFM_MRK_EN) != MSFM_MRK_EN)
         {
             EXTI->RPR1 = EXTI_RPR1_RPIF5;
             return;
@@ -133,9 +133,9 @@ void __attribute__( ( interrupt, used ) ) EXTI4_15_IRQHandler( void )
         return;
     }
 
-    if ( EXTI->FPR1 & EXTI_FPR1_FPIF5 )
+    if (EXTI->FPR1 & EXTI_FPR1_FPIF5)
     {
-        if ( READ_BIT( msfm_mrk, MSFM_MRK_EN ) != MSFM_MRK_EN )
+        if (READ_BIT(msfm_mrk, MSFM_MRK_EN) != MSFM_MRK_EN)
         {
             EXTI->FPR1 = EXTI_FPR1_FPIF5;
             return;
@@ -143,17 +143,17 @@ void __attribute__( ( interrupt, used ) ) EXTI4_15_IRQHandler( void )
 
         // TODO: Старт передачи
         USART1->CR1 &= ~USART_CR1_UE;
-        SET_BIT( msfm_mrk, MSFM_MRK_MOVING );
+        SET_BIT(msfm_mrk, MSFM_MRK_MOVING);
         EXTI->FPR1 = EXTI_FPR1_FPIF5;
         return;
     }
 }
 
-void __attribute__( ( interrupt, used ) ) EXTI2_3_IRQHandler( void )
+void __attribute__((interrupt, used)) EXTI2_3_IRQHandler(void)
 {
-    if ( EXTI->RPR1 & EXTI_RPR1_RPIF3 )
+    if (EXTI->RPR1 & EXTI_RPR1_RPIF3)
     {
-        if ( READ_BIT( msfm_mrk, MSFM_MRK_EN ) != MSFM_MRK_EN )
+        if (READ_BIT(msfm_mrk, MSFM_MRK_EN) != MSFM_MRK_EN)
         {
             EXTI->RPR1 = EXTI_RPR1_RPIF3;
             return;
@@ -164,9 +164,9 @@ void __attribute__( ( interrupt, used ) ) EXTI2_3_IRQHandler( void )
         return;
     }
 
-    if ( EXTI->FPR1 & EXTI_FPR1_FPIF3 )
+    if (EXTI->FPR1 & EXTI_FPR1_FPIF3)
     {
-        if ( READ_BIT( msfm_mrk, MSFM_MRK_EN ) != MSFM_MRK_EN )
+        if (READ_BIT(msfm_mrk, MSFM_MRK_EN) != MSFM_MRK_EN)
         {
             EXTI->FPR1 = EXTI_FPR1_FPIF3;
             return;
@@ -178,26 +178,26 @@ void __attribute__( ( interrupt, used ) ) EXTI2_3_IRQHandler( void )
     }
 }
 
-void __attribute__( ( interrupt, used ) ) TIM2_IRQHandler( void )
+void __attribute__((interrupt, used)) TIM2_IRQHandler(void)
 {
-    if ( TIM2->SR & TIM_SR_UIF )
+    if (TIM2->SR & TIM_SR_UIF)
     {
         TIM2->SR &= ~TIM_SR_UIF;
-        if ( READ_BIT( msfm_mrk, MSFM_MRK_EN ) != MSFM_MRK_EN )
+        if (READ_BIT(msfm_mrk, MSFM_MRK_EN) != MSFM_MRK_EN)
         {
             TIM2->CR1 &= ~TIM_CR1_CEN;
             return;
         }
 
         GPIOA->BSRR = stepper_.m_step_pin;
-        (void) GPIOA->BSRR;
-        GPIOA->BSRR = (uint32_t) stepper_.m_step_pin << 16;
+        (void)GPIOA->BSRR;
+        GPIOA->BSRR = (uint32_t)stepper_.m_step_pin << 16;
 
-        switch ( stepper_.m_state )
+        switch (stepper_.m_state)
         {
             case StepperState::STEPPER_ACCEL:
                 stepper_.m_current_speed += stepper_.m_speed_increment;
-                if ( ++stepper_.m_step_count >= stepper_.m_accel_steps )
+                if (++stepper_.m_step_count >= stepper_.m_accel_steps)
                 {
                     stepper_.m_step_count = 0;
                     stepper_.m_state = StepperState::STEPPER_CRUISE;
@@ -205,7 +205,7 @@ void __attribute__( ( interrupt, used ) ) TIM2_IRQHandler( void )
                 break;
 
             case StepperState::STEPPER_CRUISE:
-                if ( ++stepper_.m_step_count >= stepper_.m_cruise_steps )
+                if (++stepper_.m_step_count >= stepper_.m_cruise_steps)
                 {
                     stepper_.m_step_count = 0;
                     stepper_.m_state = StepperState::STEPPER_DECEL;
@@ -214,10 +214,10 @@ void __attribute__( ( interrupt, used ) ) TIM2_IRQHandler( void )
 
             case StepperState::STEPPER_DECEL:
                 stepper_.m_current_speed -= stepper_.m_speed_increment;
-                if ( ++stepper_.m_step_count >= stepper_.m_accel_steps )
+                if (++stepper_.m_step_count >= stepper_.m_accel_steps)
                 {
                     stepper_.m_state = StepperState::STEPPER_IDLE;
-                    GPIOA->BSRR = (uint32_t) stepper_.m_dir_pin << 16;
+                    GPIOA->BSRR = (uint32_t)stepper_.m_dir_pin << 16;
                     TIM2->CR1 &= ~TIM_CR1_CEN;
                     GPIOA->ODR &= ~GPIO_ODR_OD6; // off STATUSx
                 }
@@ -227,10 +227,10 @@ void __attribute__( ( interrupt, used ) ) TIM2_IRQHandler( void )
                 break;
         }
 
-        if ( stepper_.m_state != StepperState::STEPPER_IDLE )
+        if (stepper_.m_state != StepperState::STEPPER_IDLE)
         {
             TIM2->CR1 &= ~TIM_CR1_CEN;
-            uint32_t period = (uint32_t) ( SystemCoreClock / ( stepper_.m_current_speed * 2 ) );
+            uint32_t period = (uint32_t)(SystemCoreClock / (stepper_.m_current_speed * 2));
             TIM2->ARR = period - 1;
             TIM2->CNT = 0;
             TIM2->CR1 |= TIM_CR1_CEN;
@@ -239,11 +239,11 @@ void __attribute__( ( interrupt, used ) ) TIM2_IRQHandler( void )
 }
 }
 
-int main( void )
+int main(void)
 {
     SystemCoreClockSet64MHz();
-    USART usart_( 115200, USART1_NVIC_PRIORITY );
-    EXIT_init( PB3_NVIC_PRIORITY, PA4_PA5_NVIC_PRIORITY );
+    USART usart_(115200, USART1_NVIC_PRIORITY);
+    EXIT_init(PB3_NVIC_PRIORITY, PA4_PA5_NVIC_PRIORITY);
 
     GPIOA->MODER &= ~GPIO_MODER_MODE0;
     GPIOA->MODER |= GPIO_MODER_MODE0_0;
@@ -262,19 +262,20 @@ int main( void )
     GPIOA->OTYPER &= ~GPIO_OTYPER_OT3;
     GPIOA->PUPDR &= ~GPIO_PUPDR_PUPD3;
 
-    stepper_.moving( 20000, 20000, 5000 );
+    stepper_.moving(20000, 20000, 5000);
 
     uint32_t *ptr = nullptr;
-    while ( 1 )
+    while (1)
     {
-        if ( READ_BIT( msfm_mrk, MSG_STATUS ) == MSG_STATUS )
+        if (READ_BIT(msfm_mrk, MSG_STATUS) == MSG_STATUS)
         {
-            CLEAR_BIT( msfm_mrk, MSG_STATUS );
-            ptr = ( ( READ_BIT( msfm_mrk, MSFM_MRK_MODE ) ) ? &msfm2._settings[0] : &msfm1._settings[0] );
-            stepper_.moving( *( ptr + 0 ), *( ptr + 1 ), *( ptr + 2 ) );
+            CLEAR_BIT(msfm_mrk, MSG_STATUS);
+            ptr = ((READ_BIT(msfm_mrk, MSFM_MRK_MODE)) ? &msfm2._settings[0] : &msfm1._settings[0]);
+            stepper_.moving(*(ptr + 0), *(ptr + 1), *(ptr + 2));
             GPIOA->ODR |= GPIO_ODR_OD6;
-            while ( READ_BIT( msfm_mrk, MSFM_MRK_MOVING ) != MSFM_MRK_MOVING );
-            CLEAR_BIT( msfm_mrk, MSFM_MRK_MOVING );
+            while (READ_BIT(msfm_mrk, MSFM_MRK_MOVING) != MSFM_MRK_MOVING)
+                ;
+            CLEAR_BIT(msfm_mrk, MSFM_MRK_MOVING);
             stepper_.launch();
         }
     }

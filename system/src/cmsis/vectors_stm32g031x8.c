@@ -32,45 +32,45 @@
 
 // ----------------------------------------------------------------------------
 
-void __attribute__( ( weak ) ) Default_Handler( void );
+void __attribute__((weak)) Default_Handler(void);
 
 // Forward declaration of the specific IRQ handlers. These are aliased
 // to the Default_Handler, which is a 'forever' loop. When the application
 // defines a handler (with the same name), this will automatically take
 // precedence over these weak definitions
 
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) WWDG_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) PVD_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) RTC_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) FLASH_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) RCC_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) EXTI0_1_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) EXTI2_3_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) EXTI4_15_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) DMA1_Channel1_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) DMA1_Channel2_3_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) DMA1_Channel4_5_6_7_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) ADC1_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) TIM1_BRK_UP_TRG_COM_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) TIM1_CC_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) TIM2_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) TIM3_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) TIM14_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) TIM16_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) TIM17_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) I2C1_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) I2C2_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) SPI1_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) SPI2_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) USART1_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) USART2_IRQHandler( void );
-void __attribute__( ( weak, alias( "Default_Handler" ) ) ) LPUART1_IRQHandler( void );
+void __attribute__((weak, alias("Default_Handler"))) WWDG_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) PVD_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) RTC_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) FLASH_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) RCC_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) EXTI0_1_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) EXTI2_3_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) EXTI4_15_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) DMA1_Channel1_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) DMA1_Channel2_3_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) DMA1_Channel4_5_6_7_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) ADC1_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) TIM1_BRK_UP_TRG_COM_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) TIM1_CC_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) TIM2_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) TIM3_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) TIM14_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) TIM16_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) TIM17_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) I2C1_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) I2C2_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) SPI1_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) SPI2_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) USART1_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) USART2_IRQHandler(void);
+void __attribute__((weak, alias("Default_Handler"))) LPUART1_IRQHandler(void);
 
 // ----------------------------------------------------------------------------
 
 extern unsigned int _estack;
 
-typedef void ( *const pHandler )( void );
+typedef void (*const pHandler)(void);
 
 // ----------------------------------------------------------------------------
 
@@ -78,15 +78,15 @@ typedef void ( *const pHandler )( void );
 // and relies on the linker script to place it at the correct location
 // in memory.
 
-__attribute__( ( section( ".isr_vector" ), used ) ) pHandler __isr_vectors[] = {
+__attribute__((section(".isr_vector"), used)) pHandler __isr_vectors[] = {
     // Cortex-M Core Handlers
-    (pHandler) &_estack, // The initial stack pointer
-    Reset_Handler,       // The reset handler
+    (pHandler)&_estack, // The initial stack pointer
+    Reset_Handler,      // The reset handler
 
     NMI_Handler,       // The NMI handler
     HardFault_Handler, // The hard fault handler
 
-#if defined( __ARM_ARCH_7M__ ) || defined( __ARM_ARCH_7EM__ )
+#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
     MemManage_Handler,  // The MPU fault handler
     BusFault_Handler,   // The bus fault handler
     UsageFault_Handler, // The usage fault handler
@@ -100,7 +100,7 @@ __attribute__( ( section( ".isr_vector" ), used ) ) pHandler __isr_vectors[] = {
     0,           // Reserved
     0,           // Reserved
     SVC_Handler, // SVCall handler
-#if defined( __ARM_ARCH_7M__ ) || defined( __ARM_ARCH_7EM__ )
+#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
     DebugMon_Handler, // Debug monitor handler
 #else
     0, // Reserved
@@ -151,12 +151,12 @@ __attribute__( ( section( ".isr_vector" ), used ) ) pHandler __isr_vectors[] = {
 // When in DEBUG, trigger a debug exception to clearly notify
 // the user of the exception and help identify the cause.
 
-void __attribute__( ( section( ".after_vectors" ) ) ) Default_Handler( void )
+void __attribute__((section(".after_vectors"))) Default_Handler(void)
 {
-#if defined( DEBUG )
+#if defined(DEBUG)
     __DEBUG_BKPT();
 #endif
-    while ( 1 )
+    while (1)
     {
         ;
     }

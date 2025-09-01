@@ -2,7 +2,7 @@
 
 #include "usart.hpp"
 
-USART::USART( const uint32_t baud, const uint8_t priotity )
+USART::USART(const uint32_t baud, const uint8_t priotity)
 {
     RCC->IOPENR |= RCC_IOPENR_GPIOAEN; /* Enable clock for GPIO Port A */
     RCC->APBENR2 |= RCC_APBENR2_USART1EN;
@@ -29,33 +29,33 @@ USART::USART( const uint32_t baud, const uint8_t priotity )
     GPIOA->AFR[1] |= 1 << GPIO_AFRH_AFSEL10_Pos; // AF1: USART pins
 
     USART1->CR1 &= ~USART_CR1_UE;
-    USART1->CR1 &= ~( USART_CR1_M | USART_CR1_OVER8 );
-    USART1->BRR = ( SystemCoreClock / baud );
+    USART1->CR1 &= ~(USART_CR1_M | USART_CR1_OVER8);
+    USART1->BRR = (SystemCoreClock / baud);
     USART1->CR2 &= ~USART_CR2_STOP;
     // configuration, transmit enable
     // default 8-N-1 configuration, transmit & receive enable
-    USART1->CR1 = ( USART_CR1_TE | USART_CR1_RE | USART_CR1_RXNEIE_RXFNEIE );
+    USART1->CR1 = (USART_CR1_TE | USART_CR1_RE | USART_CR1_RXNEIE_RXFNEIE);
     // USART1->CR1 |= USART_CR1_UE;
 
-    NVIC_EnableIRQ( USART1_IRQn );
-    NVIC_SetPriority( USART1_IRQn, priotity );
+    NVIC_EnableIRQ(USART1_IRQn);
+    NVIC_SetPriority(USART1_IRQn, priotity);
 }
 
-void USART::writeb( const uint8_t data )
+void USART::writeb(const uint8_t data)
 {
     // while ( ( USART1->ISR & USART_ISR_TXE_TXFNF ) == 0 );
     USART1->TDR = data;
-    while ( ( USART1->ISR & USART_ISR_TC ) == 0 );
+    while ((USART1->ISR & USART_ISR_TC) == 0)
+        ;
 }
 
-void USART::writebs( const uint8_t *ptr, const uint32_t size )
+void USART::writebs(const uint8_t *ptr, const uint32_t size)
 {
-    if ( ptr == nullptr )
+    if (ptr == nullptr)
         return;
 
-    for ( uint32_t i = 0; i < size; ++i )
+    for (uint32_t i = 0; i < size; ++i)
     {
-        this->writeb( *( ptr + i ) );
+        this->writeb(*(ptr + i));
     }
 }
-
